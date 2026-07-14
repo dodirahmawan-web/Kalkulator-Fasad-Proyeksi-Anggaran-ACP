@@ -3,58 +3,452 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Fasad ACP</title>
+    <title>Kalkulator Luas Fasad & Anggaran ACP</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 p-8">
-    <div class="max-w-xl mx-auto bg-slate-800 p-6 rounded-xl shadow-lg">
-        <h1 class="text-xl font-bold mb-6 text-white">Kalkulator Biaya ACP</h1>
-        
-        <div class="space-y-6">
-            <div>
-                <label class="block text-sm mb-2">Harga Jasa (/m²)</label>
-                <input type="number" id="num-harga-jasa" class="w-full bg-slate-700 p-2 rounded border border-slate-600 text-white" value="0">
-                <input type="range" id="input-harga-jasa" class="w-full mt-2 accent-blue-500" value="0" min="0" max="500000">
+<body class="bg-slate-900 text-slate-100 min-h-screen antialiased">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="border-b border-slate-800 pb-6 mb-8">
+            <h1 class="text-3xl font-bold text-white tracking-tight">Kalkulator Fasad & Proyeksi Anggaran ACP</h1>
+            <p class="text-slate-400 mt-2 text-sm md:text-base">Estimasi Luas Bersih, RAB Tahun <span id="lbl-tahun-berjalan" class="font-bold text-blue-400"></span>, dan Eskalasi Kontingensi <span id="lbl-tahun-depan" class="font-bold text-teal-400"></span>.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Column: Inputs -->
+            <div class="lg:col-span-5 space-y-6">
+                <!-- Section 1: Dimensi Bangunan -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+                    <h2 class="text-lg font-semibold text-teal-400 mb-4 flex items-center gap-2">
+                        <span>1. Dimensi & Struktur Fasad</span>
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-sm font-medium text-slate-300">Keliling Bangunan (m)</label>
+                                <input type="number" id="num-keliling" value="80" class="w-24 bg-slate-700 text-teal-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500">
+                            </div>
+                            <input type="range" id="input-keliling" min="10" max="500" value="80" class="w-full accent-teal-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-sm font-medium text-slate-300">Tinggi Bangunan (m)</label>
+                                <input type="number" id="num-tinggi" value="10" class="w-24 bg-slate-700 text-teal-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500">
+                            </div>
+                            <input type="range" id="input-tinggi" min="3" max="100" value="10" class="w-full accent-teal-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
+                        </div>
+                        
+                        <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 mt-2">
+                            <div class="mb-3 border-b border-slate-700 pb-2">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-sm font-semibold text-slate-300">Jumlah Jendela (Unit)</label>
+                                    <input type="number" id="num-jendela" value="20" class="w-20 bg-slate-700 text-teal-400 font-bold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500">
+                                </div>
+                                <input type="range" id="input-jendela" min="0" max="200" value="20" class="w-full accent-teal-500 bg-slate-700 h-1.5 rounded-lg cursor-pointer">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="text-xs font-medium text-slate-400">Lebar (m)</label>
+                                        <input type="number" id="num-lebar-jendela" value="1.0" step="0.1" class="w-16 bg-slate-700 text-slate-300 text-right rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500">
+                                    </div>
+                                    <input type="range" id="input-lebar-jendela" min="0.5" max="5" step="0.1" value="1.0" class="w-full accent-slate-500 bg-slate-700 h-1 rounded-lg cursor-pointer">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="text-xs font-medium text-slate-400">Tinggi (m)</label>
+                                        <input type="number" id="num-tinggi-jendela" value="2.0" step="0.1" class="w-16 bg-slate-700 text-slate-300 text-right rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500">
+                                    </div>
+                                    <input type="range" id="input-tinggi-jendela" min="0.5" max="5" step="0.1" value="2.0" class="w-full accent-slate-500 bg-slate-700 h-1 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+                            <div class="text-right mt-2 text-xs text-slate-400">
+                                Luas per jendela: <span id="val-luas-jendela" class="font-semibold text-teal-400">2.0</span> m²
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Spesifikasi Material ACP -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+                    <h2 class="text-lg font-semibold text-blue-400 mb-4">2. Harga Panel ACP (<span class="dyn-year-curr"></span>)</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Tipe & Merek ACP</label>
+                            <select id="select-tipe-acp" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                                <optgroup label="SEVEN (Market Leader)">
+                                    <option value="seven-pe">Seven - Interior (PE 4mm)</option>
+                                    <option value="seven-pvdf" selected>Seven - Eksterior (PVDF 4mm)</option>
+                                    <option value="seven-fr">Seven - Premium (Fire Retardant)</option>
+                                </optgroup>
+                                <optgroup label="MARKS (Mid-Range)">
+                                    <option value="marks-pe">Marks - Interior (PE 3mm)</option>
+                                    <option value="marks-pvdf">Marks - Eksterior (PVDF 4mm)</option>
+                                </optgroup>
+                                <optgroup label="JIYU / MACO (Budget)">
+                                    <option value="jiyu-pe">Jiyu/Maco - Interior (PE 3mm - 4mm)</option>
+                                    <option value="jiyu-pvdf">Jiyu/Maco - Eksterior (PVDF 4mm)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-sm font-medium text-slate-300">Material/m² (Rp)</label>
+                                <input type="number" id="num-harga-acp" class="w-32 bg-slate-700 text-blue-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            </div>
+                            <input type="range" id="input-harga-acp" step="5000" class="w-full accent-blue-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
+                            <p class="text-[10px] text-slate-400 mt-1 italic">Harga diatur otomatis ke standar merek saat dipilih, namun Anda bebas mengubahnya.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Biaya Penguatan & Jasa -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+                    <h2 class="text-lg font-semibold text-amber-400 mb-4">3. Penguatan & Jasa (<span class="dyn-year-curr"></span>)</h2>
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-sm font-medium text-slate-300">Rangka /m² (Rp)</label>
+                                <input type="number" id="num-harga-rangka" class="w-32 bg-slate-700 text-amber-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                            </div>
+                            <input type="range" id="input-harga-rangka" step="2000" class="w-full accent-amber-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
+                            <p class="text-[10px] text-slate-400 mt-1 italic">Cek harga besi hollow/aluminium terbaru di pasaran untuk estimasi lebih presisi.</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-sm font-medium text-slate-300">Aksesoris /m² (Rp)</label>
+                                <input type="number" id="num-harga-aksesoris" class="w-32 bg-slate-700 text-amber-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                            </div>
+                            <input type="range" id="input-harga-aksesoris" step="1000" class="w-full accent-amber-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
+                            <p class="text-[10px] text-slate-400 mt-1 italic">Mencakup sealant netral, sekrup khusus ACP, dan material pendukung (backup).</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-sm font-medium text-slate-300">Jasa & Steger /m² (Rp)</label>
+                                <input type="number" id="num-harga-jasa" class="w-32 bg-slate-700 text-amber-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                            </div>
+                            <input type="range" id="input-harga-jasa" step="5000" class="w-full accent-amber-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
+                            <p class="text-[10px] text-slate-400 mt-1 italic">Sangat bergantung pada tingkat kesulitan potong dan elevasi sewa perancah (scaffolding).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Proyeksi Eskalasi -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+                    <h2 class="text-lg font-semibold text-rose-400 mb-4">4. Faktor Eskalasi (<span class="dyn-year-next"></span>)</h2>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-sm font-medium text-slate-300">Margin Pengaman (%)</label>
+                            <input type="number" id="num-eskalasi" value="7" class="w-20 bg-slate-700 text-rose-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-rose-500">
+                        </div>
+                        <input type="range" id="input-eskalasi" min="0" max="20" step="1" value="7" class="w-full accent-rose-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
+                        <p class="text-[10px] text-slate-400 mt-2">Standar acuan wajar industri berkisar 5% - 10% untuk mengantisipasi inflasi tahun depan.</p>
+                    </div>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm mb-2">Harga Rangka (/m²)</label>
-                <input type="number" id="num-harga-rangka" class="w-full bg-slate-700 p-2 rounded border border-slate-600 text-white" value="0">
-                <input type="range" id="input-harga-rangka" class="w-full mt-2 accent-blue-500" value="0" min="0" max="500000">
-            </div>
+            <!-- Right Column: Outputs/Dashboard -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- Summary Matrix -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-4 text-center">
+                        <span class="text-xs font-medium text-slate-400 block mb-1">LUAS FASAD BERSIH</span>
+                        <span class="text-2xl font-bold text-white"><span id="dash-luas-bersih">0</span> <span class="text-sm text-slate-400">m²</span></span>
+                        <span class="text-[10px] text-slate-500 block mt-1">Kotor: <span id="dash-luas-kotor">0</span> m²</span>
+                    </div>
+                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-4 text-center relative overflow-hidden">
+                        <span class="text-xs font-medium text-blue-400 block mb-1">TOTAL RAB (<span class="dyn-year-curr"></span>)</span>
+                        <span class="text-2xl font-bold text-blue-400">Rp <span id="dash-total-curr">0</span></span>
+                        <span class="text-[10px] text-slate-400 block mt-1">Satuan: Rp <span id="dash-satuan-curr">0</span>/m²</span>
+                    </div>
+                    <div class="bg-gradient-to-br from-teal-950/40 to-slate-900 border border-teal-800 rounded-xl p-4 text-center relative overflow-hidden">
+                        <span class="text-xs font-medium text-teal-400 block mb-1">PROYEKSI (<span class="dyn-year-next"></span>)</span>
+                        <span class="text-2xl font-bold text-teal-400">Rp <span id="dash-total-next">0</span></span>
+                        <span class="text-[10px] text-teal-500 block mt-1">Eskalasi: +Rp <span id="dash-nilai-eskalasi">0</span></span>
+                    </div>
+                </div>
 
-            <div class="pt-4 border-t border-slate-700">
-                <p class="text-lg font-semibold">Total: Rp <span id="display-total">0</span></p>
+                <!-- Detailed Report Table -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+                    <h3 class="text-base font-semibold text-white mb-4">Rincian Komponen Anggaran Biaya</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-300">
+                            <thead class="bg-slate-700/50 text-slate-200 uppercase text-xs tracking-wider">
+                                <tr>
+                                    <th class="px-4 py-3 rounded-l-lg">Komponen Pekerjaan</th>
+                                    <th class="px-4 py-3 text-right">Biaya Satuan (/m²)</th>
+                                    <th class="px-4 py-3 text-right rounded-r-lg">Subtotal (Luas Bersih)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700">
+                                <tr>
+                                    <td class="px-4 py-3.5 font-medium text-white">Material Panel ACP</td>
+                                    <td class="px-4 py-3.5 text-right text-slate-400">Rp <span id="table-satuan-acp">0</span></td>
+                                    <td class="px-4 py-3.5 text-right font-semibold">Rp <span id="table-sub-acp">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-medium text-white">Penguatan Rangka Struktural</td>
+                                    <td class="px-4 py-3.5 text-right text-slate-400">Rp <span id="table-satuan-rangka">0</span></td>
+                                    <td class="px-4 py-3.5 text-right font-semibold">Rp <span id="table-sub-rangka">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-medium text-white">Aksesoris & Pemurnian Finishing</td>
+                                    <td class="px-4 py-3.5 text-right text-slate-400">Rp <span id="table-satuan-aksesoris">0</span></td>
+                                    <td class="px-4 py-3.5 text-right font-semibold">Rp <span id="table-sub-aksesoris">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3.5 font-medium text-white">Jasa Teknisi & Scaffolding</td>
+                                    <td class="px-4 py-3.5 text-right text-slate-400">Rp <span id="table-satuan-jasa">0</span></td>
+                                    <td class="px-4 py-3.5 text-right font-semibold">Rp <span id="table-sub-jasa">0</span></td>
+                                </tr>
+                                <tr class="bg-slate-750/50 font-semibold text-white">
+                                    <td class="px-4 py-4 text-base">Total Anggaran Pokok (<span class="dyn-year-curr"></span>)</td>
+                                    <td class="px-4 py-4 text-right text-slate-400">-</td>
+                                    <td class="px-4 py-4 text-right text-base text-blue-400">Rp <span id="table-total-curr">0</span></td>
+                                </tr>
+                                <tr class="text-rose-400 italic">
+                                    <td class="px-4 py-3">Faktor Eskalasi/Kontingensi</td>
+                                    <td class="px-4 py-3 text-right"><span id="table-persen-eskalasi">0</span>%</td>
+                                    <td class="px-4 py-3 text-right">Rp <span id="table-nilai-eskalasi">0</span></td>
+                                </tr>
+                                <tr class="bg-teal-950/30 font-bold text-white border-t-2 border-teal-800">
+                                    <td class="px-4 py-4 text-lg text-teal-400">Proyeksi Pagu Anggaran (<span class="dyn-year-next"></span>)</td>
+                                    <td class="px-4 py-4 text-right text-slate-400">-</td>
+                                    <td class="px-4 py-4 text-right text-lg text-teal-400">Rp <span id="table-total-next">0</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Graphic Analytics Visualizations -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+                    <h3 class="text-base font-semibold text-white mb-4">Proporsi Alokasi Anggaran Pokok</h3>
+                    <div class="relative w-full aspect-[2/1] max-h-[250px] flex justify-center">
+                        <canvas id="chartProporsi"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Core Interactive Logic Script -->
     <script>
-        const inputs = [
-            { id: 'harga-jasa' },
-            { id: 'harga-rangka' }
-        ];
+        // 1. DYNAMIC YEAR & INFLATION LOGIC
+        const baseYear = 2026;
+        const currentYear = new Date().getFullYear();
+        const nextYear = currentYear + 1;
+        const estimatedAnnualInflation = 0.05; // 5% compound standard construction inflation
+        
+        // Calculate multiplier based on year difference (don't go below 1 if users clock is wrong)
+        const yearsPassed = Math.max(0, currentYear - baseYear);
+        const inflationMultiplier = Math.pow(1 + estimatedAnnualInflation, yearsPassed);
 
-        function kalkulasi() {
-            const jasa = parseFloat(document.getElementById('num-harga-jasa').value) || 0;
-            const rangka = parseFloat(document.getElementById('num-harga-rangka').value) || 0;
-            document.getElementById('display-total').innerText = (jasa + rangka).toLocaleString('id-ID');
+        // Update UI Labels for Years
+        document.getElementById('lbl-tahun-berjalan').innerText = currentYear;
+        document.getElementById('lbl-tahun-depan').innerText = nextYear;
+        document.querySelectorAll('.dyn-year-curr').forEach(el => el.innerText = currentYear);
+        document.querySelectorAll('.dyn-year-next').forEach(el => el.innerText = nextYear);
+
+        // 2. BASE DATA ESTIMATES (Tahun 2026)
+        // Data ini dikalikan dengan multiplier inflasi untuk mendapatkan harga standar tahun berjalan
+        const baseAcpSpecs = {
+            'seven-pe': { min: 580000, def: 620000 },
+            'seven-pvdf': { min: 820000, def: 880000 },
+            'seven-fr': { min: 1100000, def: 1200000 },
+            
+            'marks-pe': { min: 530000, def: 560000 },
+            'marks-pvdf': { min: 720000, def: 780000 },
+            
+            'jiyu-pe': { min: 480000, def: 520000 },
+            'jiyu-pvdf': { min: 680000, def: 740000 }
+        };
+
+        const baseKomponen = {
+            rangka: { min: 60000, max: 150000, def: 80000 },
+            aksesoris: { min: 40000, max: 100000, def: 45000 },
+            jasa: { min: 130000, max: 350000, def: 165000 }
+        };
+
+        function applyInflation(value) {
+            // Round to nearest 1000 for realistic pricing
+            return Math.round((value * inflationMultiplier) / 1000) * 1000;
         }
 
-        inputs.forEach(item => {
-            const num = document.getElementById(`num-${item.id}`);
-            const range = document.getElementById(`input-${item.id}`);
+        // Input pairs
+        const syncPairs = [
+            { id: 'keliling' },
+            { id: 'tinggi' },
+            { id: 'jendela' },
+            { id: 'lebar-jendela' },
+            { id: 'tinggi-jendela' },
+            { id: 'harga-acp' },
+            { id: 'harga-rangka' },
+            { id: 'harga-aksesoris' },
+            { id: 'harga-jasa' },
+            { id: 'eskalasi' }
+        ];
 
-            num.addEventListener('input', (e) => {
-                range.value = e.target.value;
-                kalkulasi();
+        const selectTipeAcp = document.getElementById('select-tipe-acp');
+        let myChart = null;
+
+        function formatRibuan(angka) {
+            return new Intl.NumberFormat('id-ID').format(angka);
+        }
+
+        // Setup base boundaries for auxiliary components based on current year inflation
+        function initComponentLimits() {
+            const comps = [
+                { id: 'rangka', data: baseKomponen.rangka },
+                { id: 'aksesoris', data: baseKomponen.aksesoris },
+                { id: 'jasa', data: baseKomponen.jasa }
+            ];
+
+            comps.forEach(comp => {
+                const rangeEl = document.getElementById(`input-harga-${comp.id}`);
+                const numEl = document.getElementById(`num-harga-${comp.id}`);
+                
+                const currentDef = applyInflation(comp.data.def);
+
+                rangeEl.min = 0;
+                rangeEl.max = 5000000;
+                
+                // Initialize default values on first load
+                rangeEl.value = currentDef;
+                numEl.value = currentDef;
+            });
+        }
+
+        function updateSliderLimits() {
+            const specBase = baseAcpSpecs[selectTipeAcp.value];
+            const rangeAcp = document.getElementById('input-harga-acp');
+            const numAcp = document.getElementById('num-harga-acp');
+            
+            const currentDef = applyInflation(specBase.def);
+            const sliderMaxLimit = 5000000; // Arbitrary high limit
+
+            rangeAcp.min = 0; // Removed physical lower limit
+            rangeAcp.max = sliderMaxLimit;
+            
+            // Set value to standard default of selected brand when user changes the dropdown
+            rangeAcp.value = currentDef;
+            numAcp.value = currentDef;
+        }
+
+        // Setup event listeners for two-way sync
+        syncPairs.forEach(pair => {
+            const rangeInput = document.getElementById(`input-${pair.id}`);
+            const numInput = document.getElementById(`num-${pair.id}`);
+            
+            rangeInput.addEventListener('input', (e) => {
+                numInput.value = e.target.value;
+                kalkulasiSemua();
             });
 
-            range.addEventListener('input', (e) => {
-                num.value = e.target.value;
-                kalkulasi();
+            numInput.addEventListener('input', (e) => {
+                rangeInput.value = e.target.value;
+                kalkulasiSemua();
             });
         });
+
+        function kalkulasiSemua() {
+            const keliling = parseFloat(document.getElementById('input-keliling').value) || 0;
+            const tinggi = parseFloat(document.getElementById('input-tinggi').value) || 0;
+            const jmlJendela = parseInt(document.getElementById('input-jendela').value) || 0;
+            const lebarJendela = parseFloat(document.getElementById('input-lebar-jendela').value) || 0;
+            const tinggiJendela = parseFloat(document.getElementById('input-tinggi-jendela').value) || 0;
+            
+            const hargaAcp = parseFloat(document.getElementById('input-harga-acp').value) || 0;
+            const hargaRangka = parseFloat(document.getElementById('input-harga-rangka').value) || 0;
+            const hargaAksesoris = parseFloat(document.getElementById('input-harga-aksesoris').value) || 0;
+            const hargaJasa = parseFloat(document.getElementById('input-harga-jasa').value) || 0;
+            const eskalasiPersen = parseFloat(document.getElementById('input-eskalasi').value) || 0;
+
+            // Math transformations
+            const luasKotor = keliling * tinggi;
+            const luasSatuJendela = lebarJendela * tinggiJendela;
+            const penguranganJendela = jmlJendela * luasSatuJendela;
+            const luasBersih = Math.max(0, luasKotor - penguranganJendela);
+
+            document.getElementById('val-luas-jendela').innerText = luasSatuJendela.toFixed(2);
+
+            const biayaSatuanCurr = hargaAcp + hargaRangka + hargaAksesoris + hargaJasa;
+            const totalCurr = luasBersih * biayaSatuanCurr;
+            const nilaiEskalasi = totalCurr * (eskalasiPersen / 100);
+            const totalNext = totalCurr + nilaiEskalasi;
+
+            // Render output dashboard metrics
+            document.getElementById('dash-luas-bersih').innerText = formatRibuan(Math.round(luasBersih));
+            document.getElementById('dash-luas-kotor').innerText = formatRibuan(luasKotor);
+            document.getElementById('dash-total-curr').innerText = formatRibuan(Math.round(totalCurr));
+            document.getElementById('dash-satuan-curr').innerText = formatRibuan(biayaSatuanCurr);
+            document.getElementById('dash-total-next').innerText = formatRibuan(Math.round(totalNext));
+            document.getElementById('dash-nilai-eskalasi').innerText = formatRibuan(Math.round(nilaiEskalasi));
+
+            // Populate calculations grid table
+            document.getElementById('table-satuan-acp').innerText = formatRibuan(hargaAcp);
+            document.getElementById('table-satuan-rangka').innerText = formatRibuan(hargaRangka);
+            document.getElementById('table-satuan-aksesoris').innerText = formatRibuan(hargaAksesoris);
+            document.getElementById('table-satuan-jasa').innerText = formatRibuan(hargaJasa);
+
+            document.getElementById('table-sub-acp').innerText = formatRibuan(Math.round(luasBersih * hargaAcp));
+            document.getElementById('table-sub-rangka').innerText = formatRibuan(Math.round(luasBersih * hargaRangka));
+            document.getElementById('table-sub-aksesoris').innerText = formatRibuan(Math.round(luasBersih * hargaAksesoris));
+            document.getElementById('table-sub-jasa').innerText = formatRibuan(Math.round(luasBersih * hargaJasa));
+            
+            document.getElementById('table-total-curr').innerText = formatRibuan(Math.round(totalCurr));
+            document.getElementById('table-persen-eskalasi').innerText = eskalasiPersen;
+            document.getElementById('table-nilai-eskalasi').innerText = formatRibuan(Math.round(nilaiEskalasi));
+            document.getElementById('table-total-next').innerText = formatRibuan(Math.round(totalNext));
+
+            updateChartData(luasBersih * hargaAcp, luasBersih * hargaRangka, luasBersih * hargaAksesoris, luasBersih * hargaJasa);
+        }
+
+        function updateChartData(acp, rangka, aksesoris, jasa) {
+            const ctx = document.getElementById('chartProporsi').getContext('2d');
+            
+            if (myChart) {
+                myChart.data.datasets[0].data = [acp, rangka, aksesoris, jasa];
+                myChart.update();
+            } else {
+                myChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Panel ACP', 'Rangka', 'Aksesoris', 'Jasa & Steger'],
+                        datasets: [{
+                            data: [acp, rangka, aksesoris, jasa],
+                            backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+        }
+
+        selectTipeAcp.addEventListener('change', () => {
+            updateSliderLimits();
+            kalkulasiSemua();
+        });
+
+        // Initialize components state tree on boot execution
+        initComponentLimits();
+        updateSliderLimits();
+        kalkulasiSemua();
     </script>
 </body>
 </html>
