@@ -3,106 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Luas Fasad & Anggaran ACP</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Kalkulator Fasad ACP</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
+<body class="bg-slate-900 text-slate-100 p-8">
+    <div class="max-w-xl mx-auto bg-slate-800 p-6 rounded-xl shadow-lg">
+        <h1 class="text-xl font-bold mb-6 text-white">Kalkulator Biaya ACP</h1>
+        
+        <div class="space-y-6">
+            <div>
+                <label class="block text-sm mb-2">Harga Jasa (/m²)</label>
+                <input type="number" id="num-harga-jasa" class="w-full bg-slate-700 p-2 rounded border border-slate-600 text-white" value="0">
+                <input type="range" id="input-harga-jasa" class="w-full mt-2 accent-blue-500" value="0" min="0" max="500000">
+            </div>
+
+            <div>
+                <label class="block text-sm mb-2">Harga Rangka (/m²)</label>
+                <input type="number" id="num-harga-rangka" class="w-full bg-slate-700 p-2 rounded border border-slate-600 text-white" value="0">
+                <input type="range" id="input-harga-rangka" class="w-full mt-2 accent-blue-500" value="0" min="0" max="500000">
+            </div>
+
+            <div class="pt-4 border-t border-slate-700">
+                <p class="text-lg font-semibold">Total: Rp <span id="display-total">0</span></p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Data Dasar
-        const baseAcpSpecs = {
-            'seven-pe': { def: 620000 },
-            'seven-pvdf': { def: 880000 },
-            'seven-fr': { def: 1200000 },
-            'marks-pe': { def: 560000 },
-            'marks-pvdf': { def: 780000 },
-            'jiyu-pe': { def: 520000 },
-            'jiyu-pvdf': { def: 740000 }
-        };
-
-        const baseKomponen = {
-            rangka: { def: 80000 },
-            aksesoris: { def: 45000 },
-            jasa: { def: 165000 }
-        };
-
-        const syncPairs = [
-            { id: 'keliling' }, { id: 'tinggi' }, { id: 'jendela' }, 
-            { id: 'lebar-jendela' }, { id: 'tinggi-jendela' },
-            { id: 'harga-acp' }, { id: 'harga-rangka' }, 
-            { id: 'harga-aksesoris' }, { id: 'harga-jasa' }, { id: 'eskalasi' }
+        const inputs = [
+            { id: 'harga-jasa' },
+            { id: 'harga-rangka' }
         ];
 
-        let isProgrammaticUpdate = false;
-
-        function applyInflation(value) { return value; } // Placeholder inflasi
-
-        function kalkulasiSemua() {
-            console.log("Menjalankan kalkulasi...");
+        function kalkulasi() {
+            const jasa = parseFloat(document.getElementById('num-harga-jasa').value) || 0;
+            const rangka = parseFloat(document.getElementById('num-harga-rangka').value) || 0;
+            document.getElementById('display-total').innerText = (jasa + rangka).toLocaleString('id-ID');
         }
 
-        function initComponentLimits() {
-            syncPairs.forEach(pair => {
-                const rangeEl = document.getElementById(`input-${pair.id}`);
-                const numEl = document.getElementById(`num-${pair.id}`);
-                if (rangeEl && numEl) {
-                    rangeEl.value = 0;
-                    numEl.value = 0;
-                }
+        inputs.forEach(item => {
+            const num = document.getElementById(`num-${item.id}`);
+            const range = document.getElementById(`input-${item.id}`);
+
+            num.addEventListener('input', (e) => {
+                range.value = e.target.value;
+                kalkulasi();
             });
-        }
 
-        function updateSliderLimits(forceDefault = true) {
-            console.log("Update limit slider");
-        }
-
-        function loadLastState() {
-            const savedData = localStorage.getItem('acp_last_state');
-            if (savedData) {
-                try {
-                    const state = JSON.parse(savedData);
-                    isProgrammaticUpdate = true;
-                    syncPairs.forEach(pair => {
-                        if (state[pair.id] !== undefined) {
-                            const numEl = document.getElementById(`num-${pair.id}`);
-                            const rangeEl = document.getElementById(`input-${pair.id}`);
-                            if(numEl && rangeEl) {
-                                numEl.value = state[pair.id];
-                                rangeEl.value = state[pair.id];
-                            }
-                        }
-                    });
-                    isProgrammaticUpdate = false;
-                    kalkulasiSemua();
-                    return true;
-                } catch (e) {
-                    console.error("Gagal parsing state", e);
-                }
-            }
-            return false;
-        }
-
-        function renderHistory() {
-            console.log("Render histori");
-        }
-
-        // Jalankan inisialisasi
-        window.onload = () => {
-            const hasSavedState = loadLastState();
-            if (!hasSavedState) {
-                initComponentLimits();
-                updateSliderLimits();
-                kalkulasiSemua();
-            }
-            renderHistory();
-        };
+            range.addEventListener('input', (e) => {
+                num.value = e.target.value;
+                kalkulasi();
+            });
+        });
     </script>
 </body>
 </html>
