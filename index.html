@@ -102,9 +102,8 @@
                                 <input type="number" id="num-harga-acp" class="w-32 bg-slate-700 text-blue-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
                             </div>
                             <input type="range" id="input-harga-acp" step="5000" class="w-full accent-blue-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
-                            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+                            <div class="text-[10px] text-slate-500 mt-1">
                                 <span>Min: Rp <span id="min-acp">0</span></span>
-                                <span>Max: Rp <span id="max-acp">0</span></span>
                             </div>
                         </div>
                     </div>
@@ -141,7 +140,6 @@
                     </div>
                 </div>
 
-
                 <!-- Section 4: Proyeksi Eskalasi -->
                 <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
                     <h2 class="text-lg font-semibold text-rose-400 mb-4">4. Faktor Eskalasi (<span class="dyn-year-next"></span>)</h2>
@@ -151,7 +149,7 @@
                             <input type="number" id="num-eskalasi" value="7" class="w-20 bg-slate-700 text-rose-400 font-semibold text-right rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-rose-500">
                         </div>
                         <input type="range" id="input-eskalasi" min="0" max="20" step="1" value="7" class="w-full accent-rose-500 bg-slate-700 h-2 rounded-lg cursor-pointer">
-                        <p class="text-[11px] text-slate-400 mt-2">Standar acuan wajar industri berkisar 5% - 10%.</p>
+                        <p class="text-[10px] text-slate-400 mt-2">Standar acuan wajar industri berkisar 5% - 10% untuk mengantisipasi inflasi tahun depan.</p>
                     </div>
                 </div>
             </div>
@@ -262,21 +260,21 @@
         // 2. BASE DATA ESTIMATES (Tahun 2026)
         // Data ini dikalikan dengan multiplier inflasi untuk mendapatkan harga standar tahun berjalan
         const baseAcpSpecs = {
-            'seven-pe': { min: 580000, max: 680000, def: 620000 },
-            'seven-pvdf': { min: 820000, max: 980000, def: 880000 },
-            'seven-fr': { min: 1100000, max: 1350000, def: 1200000 },
+            'seven-pe': { min: 580000, def: 620000 },
+            'seven-pvdf': { min: 820000, def: 880000 },
+            'seven-fr': { min: 1100000, def: 1200000 },
             
-            'marks-pe': { min: 530000, max: 620000, def: 560000 },
-            'marks-pvdf': { min: 720000, max: 880000, def: 780000 },
+            'marks-pe': { min: 530000, def: 560000 },
+            'marks-pvdf': { min: 720000, def: 780000 },
             
-            'jiyu-pe': { min: 480000, max: 580000, def: 520000 },
-            'jiyu-pvdf': { min: 680000, max: 820000, def: 740000 }
+            'jiyu-pe': { min: 480000, def: 520000 },
+            'jiyu-pvdf': { min: 680000, def: 740000 }
         };
 
         const baseKomponen = {
-            rangka: { min: 60000, max: 100000, def: 80000 },
-            aksesoris: { min: 40000, max: 50000, def: 45000 },
-            jasa: { min: 130000, max: 200000, def: 165000 }
+            rangka: { min: 60000, max: 150000, def: 80000 },
+            aksesoris: { min: 40000, max: 100000, def: 45000 },
+            jasa: { min: 130000, max: 350000, def: 165000 }
         };
 
         function applyInflation(value) {
@@ -338,20 +336,19 @@
             const numAcp = document.getElementById('num-harga-acp');
             
             const currentMin = applyInflation(specBase.min);
-            const currentMax = applyInflation(specBase.max);
             const currentDef = applyInflation(specBase.def);
+            const sliderMaxLimit = 5000000; // Arbitrary high limit to effectively remove max restriction on slider
 
             rangeAcp.min = currentMin;
-            rangeAcp.max = currentMax;
+            rangeAcp.max = sliderMaxLimit;
             
             // Only force update if current value is out of bounds or it's initial load
-            if(rangeAcp.value < currentMin || rangeAcp.value > currentMax) {
+            if(rangeAcp.value < currentMin) {
                 rangeAcp.value = currentDef;
                 numAcp.value = currentDef;
             }
             
             document.getElementById('min-acp').innerText = formatRibuan(currentMin / 1000) + 'rb';
-            document.getElementById('max-acp').innerText = formatRibuan(currentMax / 1000) + 'rb';
         }
 
         // Setup event listeners for two-way sync
